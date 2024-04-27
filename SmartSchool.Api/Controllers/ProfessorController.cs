@@ -1,9 +1,8 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SmartSchool.Api.Data;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using SmartSchool.Api.DTO;
+using SmartSchool.Api.Inject;
 using SmartSchool.Api.Models;
-using System.Collections.Generic;
-using System.Linq;
 
 // For more information on enabling Web API for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
 
@@ -13,67 +12,107 @@ namespace SmartSchool.Api.Controllers
     [ApiController]
     public class ProfessorController : ControllerBase
     {
-        private readonly SmartSchoolContext context;
-        public ProfessorController(SmartSchoolContext context)
+        private readonly IRepository repository;
+
+        private readonly IMapper mapper;
+
+        public ProfessorController(IRepository repository, IMapper mapper)
         {
-            this.context = context;
+            this.repository = repository;
+            this.mapper = mapper;
         }
 
         // GET: api/<ProfessorController>
         [HttpGet]
         public IActionResult Get()
         {
-            return Ok(this.context.Professores);
+            var professor = this.repository.GetAllProfessores(true, false);
+            return Ok(professor);
         }
 
         // GET api/<ProfessorController>/5
-        [HttpGet("{id}")]
+        [HttpGet("{id:int}")]
         public IActionResult GetById(int id)
         {
-            var professor = this.context.Professores.FirstOrDefault(p => p.Id == id);
-            return Ok(this.context.Professores);
+            var professor = this.repository.GetProfessorById(id, true, true);
+            if (professor == null) return BadRequest("Professor não encontrado");
+
+            var professorResponse = this.mapper.Map<ProfessorResponseDTO>(professor);
+
+            return Ok(professorResponse);
         }
 
-        // GET api/<ProfessorController>/5
-        [HttpGet("{nome}")]
-        public IActionResult GetByName(string nome)
+        [HttpGet("getresponse")]
+        public IActionResult GetResponse(int id)
         {
-            var professor = this.context.Professores.FirstOrDefault(p => p.Nome.Contains(nome));
-            return Ok(this.context.Professores);
+            return Ok(new ProfessorResponseDTO());
         }
 
         // POST api/<ProfessorController>
         [HttpPost]
-        public IActionResult Post(Professor professor)
+        public IActionResult Post(ProfessorDTO model)
         {
-            this.context.Add(professor);
-            this.context.SaveChanges();
+            var professor = this.mapper.Map<Professor>(model);
 
-            return Ok(professor);
+            this.repository.Add(professor);
+
+            if (this.repository.SaveChanges())
+            {
+                return Created($"/api/professor/{model.Id}", this.mapper.Map<ProfessorResponseDTO>(professor));
+            }
+
+            return BadRequest("Professor não cadastrado");
         }
 
         // PUT api/<ProfessorController>/5
         [HttpPut("{id}")]
-        public IActionResult Put(int id, Professor professor)
+        public IActionResult Put(int id, ProfessorDTO model)
         {
-            var prof = this.context.Professores.AsNoTracking().FirstOrDefault(p => p.Id == id);
-            if (prof == null) return BadRequest("Professor não encontrado");
+            var professor = this.repository.GetProfessorById(id, true, true);
+            if (professor == null) return BadRequest("Professor não encontrado");
 
-            this.context.Update(professor);
-            this.context.SaveChanges();
+            this.mapper.Map(model, professor);
 
-            return Ok(professor);
+            this.repository.Update(professor);
+
+            if (this.repository.SaveChanges())
+            {
+                return Created($"/api/professor/{model.Id}", this.mapper.Map<ProfessorResponseDTO>(professor));
+            }
+
+            return BadRequest("Professor não atualizado");
+
+        }
+
+        // PUT api/<ProfessorController>/5
+        [HttpPatch("{id}")]
+        public IActionResult Patch(int id, ProfessorDTO model)
+        {
+            var professor = this.repository.GetProfessorById(id, true, true);
+            if (professor == null) return BadRequest("Professor não encontrado");
+
+            this.mapper.Map(model, professor);
+
+            this.repository.Update(professor);
+
+            if (this.repository.SaveChanges())
+            {
+                return Created($"/api/professor/{model.Id}", this.mapper.Map<ProfessorResponseDTO>(professor));
+            }
+
+            return BadRequest("Professor não atualizado");
+
         }
 
         // DELETE api/<ProfessorController>/5
         [HttpDelete("{id}")]
         public IActionResult Delete(int id)
         {
-            var professor = this.context.Professores.FirstOrDefault(p => p.Id == id);
+            var professor = this.repository.GetProfessorById(id);
             if (professor == null) return BadRequest("Professor não encontrado");
 
-            this.context.Remove(professor);
-            this.context.SaveChanges();
+            this.repository.Delete(professor);
+            this.repository.SaveChanges();
 
             return Ok(id);
         }

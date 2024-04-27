@@ -1,8 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using SmartSchool.Api.Data;
+﻿using AutoMapper;
+using Microsoft.AspNetCore.Mvc;
+using SmartSchool.Api.DTO;
+using SmartSchool.Api.Inject;
 using SmartSchool.Api.Models;
-using System.Linq;
+using System.Collections.Generic;
 
 namespace SmartSchool.Api.Controllers
 {
@@ -11,85 +12,103 @@ namespace SmartSchool.Api.Controllers
     public class AlunoController : ControllerBase
     {
 
-        private readonly SmartSchoolContext context;
+        private readonly IRepository repository;
 
-        public AlunoController(SmartSchoolContext context)
+        private readonly IMapper mapper;
+
+        public AlunoController(IRepository repository, IMapper mapper)
         {
-            this.context = context;
+            this.repository = repository;
+            this.mapper = mapper;
         }
 
         [HttpGet]
         public IActionResult Get()
         {
-            return Ok(this.context.Alunos);
+
+            var alunos = this.repository.GetAllAlunos(true);
+            return Ok(this.mapper.Map<IEnumerable<AlunoResponseDTO>>(alunos));
         }
 
         [HttpGet("{id:int}")]
         public IActionResult GetById(int id)
         {
-            var aluno = this.context.Alunos.FirstOrDefault(a => a.Id == id);
+            var aluno = this.repository.GetAlunoById(id);
             if (aluno == null) return BadRequest("Aluno não encontrado");
-            return Ok(aluno);
+
+            var alunoDto = this.mapper.Map<AlunoResponseDTO>(aluno);
+
+            return Ok(alunoDto);
         }
 
-        [HttpGet("{name}")]
-        public IActionResult GetByNome(string name)
-        {
-            var aluno = this.context.Alunos.FirstOrDefault(a => a.Nome == name);
-            if (aluno == null) return BadRequest("Aluno não encontrado");
-            return Ok(aluno);
+        [HttpGet("getresponse")]
+        public IActionResult GetResponse(int id)
+        {            
+            return Ok(new AlunoResponseDTO());
         }
 
-        [HttpGet("byname")]
-        public IActionResult GetByName(string name, string sobrenome)
-        {
-            var aluno = this.context.Alunos.FirstOrDefault(a => a.Nome == name && a.SobreNome == sobrenome);
-            if (aluno == null) return BadRequest("Aluno não encontrado");
-            return Ok(aluno);
-        }
 
         [HttpPost]
-        public IActionResult Post(Aluno aluno)
+        public IActionResult Post(AlunoDTO model)
         {
-            this.context.Add(aluno);
-            this.context.SaveChanges();
-            return Ok(aluno);
+            var checkAluno = this.repository.GetAlunoById(model.Matricula);
+            if (checkAluno != null) return BadRequest("Aluno já cadastrado.");
+
+            var aluno = this.mapper.Map<Aluno>(model);
+
+            this.repository.Add(aluno);
+
+            if (this.repository.SaveChanges())
+            {
+                return Created($"/api/aluno/{model.Id}", this.mapper.Map<AlunoResponseDTO>(aluno));
+            }
+
+            return BadRequest("Aluno não cadastrado");            
         }
 
         [HttpPut("{id:int}")]
-        public IActionResult Put(int id, Aluno aluno)
+        public IActionResult Put(int id, AlunoDTO model)
         {
-            var getaluno = this.context.Alunos.AsNoTracking().FirstOrDefault(a => a.Id == id);
-            if (getaluno == null) return BadRequest("Aluno não encontrado.");
+            var aluno = this.repository.GetAlunoById(id);
+            if (aluno == null) return BadRequest("Aluno não encontrado.");
 
-            this.context.Update(aluno);
-            this.context.SaveChanges();
+            this.mapper.Map(model, aluno);
 
+            this.repository.Update(aluno);
+            if (this.repository.SaveChanges())
+            {
+                return Created($"/api/aluno/{model.Id}", this.mapper.Map<AlunoResponseDTO>(aluno));
+            }
 
-            return Ok(aluno);
+            return BadRequest("Aluno não cadastrado");
         }
 
         [HttpPatch("{id:int}")]
-        public IActionResult Patch(int id, Aluno aluno)
+        public IActionResult Patch(int id, AlunoDTO model)
         {
-            var getaluno = this.context.Alunos.AsNoTracking().FirstOrDefault(a => a.Id == id);
-            if (getaluno == null) return BadRequest("Aluno não encontrado.");
+            var aluno = this.repository.GetAlunoById(id);
+            if (aluno == null) return BadRequest("Aluno não encontrado.");
 
-            this.context.Update(aluno);
-            this.context.SaveChanges();
+            aluno = this.mapper.Map<Aluno>(model);
 
-            return Ok(aluno);
+            this.repository.Update(aluno);
+            if (this.repository.SaveChanges())
+            {
+                return Created($"/api/aluno/{model.Id}", this.mapper.Map<AlunoResponseDTO>(aluno));
+            }
+
+            return BadRequest("Aluno não cadastrado");
         }
 
 
         [HttpDelete("{id:int}")]
         public IActionResult Delete(int id)
         {
-            var getaluno = this.context.Alunos.FirstOrDefault(a => a.Id == id);
+            var getaluno = this.repository.GetAlunoById(id);
             if (getaluno == null) return BadRequest("Aluno não encontrado.");
 
-            this.context.Remove(getaluno);
-            this.context.SaveChanges();
+            this.repository.Delete(getaluno);
+            this.repository.SaveChanges();
 
             return Ok(id);
         }
