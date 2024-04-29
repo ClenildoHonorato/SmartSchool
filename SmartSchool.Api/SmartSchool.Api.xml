@@ -1,0 +1,14 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>SmartSchool.Api</name>
+    </assembly>
+    <members>
+        <member name="M:SmartSchool.Api.Controllers.AlunoController.Get">
+            <summary>
+            Método responsável por retornor todos os aluno.
+            </summary>
+            <returns></returns>
+        </member>
+    </members>
+</doc>

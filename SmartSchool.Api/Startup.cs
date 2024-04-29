@@ -1,15 +1,17 @@
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using Microsoft.OpenApi.Models;
+using SmartSchool.Api.DAO;
 using SmartSchool.Api.Data;
 using SmartSchool.Api.Inject;
-using SmartSchool.Api.DAO;
-using Microsoft.Extensions.Options;
-using AutoMapper;
 using System;
+using System.IO;
+using System.Reflection;
 
 namespace SmartSchool.Api
 {
@@ -35,6 +37,16 @@ namespace SmartSchool.Api
 
             services.AddControllers()
                     .AddNewtonsoftJson(options => options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
+            
+            services.AddSwaggerGen(options =>
+            {
+                options.SwaggerDoc("smartschoolapi", new OpenApiInfo { Title = "SmartSchool API", Version = "v1" });
+
+                var xmlCommentsFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                var xmlCommentsFullPatch = Path.Combine(AppContext.BaseDirectory, xmlCommentsFile);
+                options.IncludeXmlComments(xmlCommentsFullPatch);
+
+            });
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
@@ -46,6 +58,12 @@ namespace SmartSchool.Api
             }
 
             app.UseRouting();
+
+            app.UseSwagger();
+            app.UseSwaggerUI(c =>
+            {
+                c.SwaggerEndpoint("/swagger/smartschoolapi/swagger.json", "SmartSchool API v1");
+            });
 
             app.UseAuthorization();
 

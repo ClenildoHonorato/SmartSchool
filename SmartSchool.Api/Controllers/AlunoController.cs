@@ -22,6 +22,11 @@ namespace SmartSchool.Api.Controllers
             this.mapper = mapper;
         }
 
+
+        /// <summary>
+        /// Método responsável por retornor todos os aluno.
+        /// </summary>
+        /// <returns></returns>
         [HttpGet]
         public IActionResult Get()
         {

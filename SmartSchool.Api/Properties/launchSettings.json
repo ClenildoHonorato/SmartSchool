@@ -4,8 +4,7 @@
     "windowsAuthentication": false,
     "anonymousAuthentication": true,
     "iisExpress": {
-      "applicationUrl": "http://localhost:16621",
-      "sslPort": 0
+      "applicationUrl": "http://localhost:16621"
     }
   },
   "profiles": {
@@ -20,8 +19,8 @@
     "SmartSchool.Api": {
       "commandName": "Project",
       "launchBrowser": true,
+      //"launchUrl": "api/Aluno",
       "requireExactSource": false,
-      "launchUrl": "api/Aluno",      
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
         "ASPNETCORE_ENVIRONMENT": "Development"
