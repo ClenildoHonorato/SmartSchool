@@ -4,7 +4,7 @@
         <name>SmartSchool.Api</name>
     </assembly>
     <members>
-        <member name="M:SmartSchool.Api.Controllers.AlunoController.Get">
+        <member name="M:SmartSchool.Api.Controllers.AlunoController.Get(SmartSchool.Api.Helpers.PageParameters)">
             <summary>
             Método responsável por retornor todos os aluno.
             </summary>

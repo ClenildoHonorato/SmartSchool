@@ -1,0 +1,23 @@
+﻿namespace SmartSchool.Api.Helpers
+{
+    public class PageParameters
+    {
+        public const int MaxPageSize = 50;
+
+        public int PageNumber { get; set; } = 1;
+
+        private int pageSize = 10;
+
+        public int? Matricula { get; set; } = null;
+
+        public string Nome { get; set; } = string.Empty;
+
+        public int? IsActive { get; set; } = null;
+
+        public int PageSize
+        {
+            get { return pageSize; }
+            set { pageSize = (value > MaxPageSize) ? MaxPageSize : value; }
+        }
+    }
+}

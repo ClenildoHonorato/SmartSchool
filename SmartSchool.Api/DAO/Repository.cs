@@ -1,20 +1,22 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using SmartSchool.Api.Data;
+using SmartSchool.Api.Helpers;
 using SmartSchool.Api.Inject;
 using SmartSchool.Api.Models;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 
 namespace SmartSchool.Api.DAO
 {
     public class Repository : IRepository
     {
-        
+
         private readonly SmartSchoolContext context;
         public Repository(SmartSchoolContext context)
         {
-                this.context = context;
+            this.context = context;
         }
 
         public void Add<T>(T entity) where T : class
@@ -34,10 +36,10 @@ namespace SmartSchool.Api.DAO
 
         public bool SaveChanges()
         {
-           return (this.context.SaveChanges() > 0);
+            return (this.context.SaveChanges() > 0);
         }
 
-        public List<Aluno> GetAllAlunos(bool includeProfessor = false)
+        public async Task<PageList<Aluno>> GetAllAlunosAsync(PageParameters pageParameters, bool includeProfessor = false)
         {
             IQueryable<Aluno> query = this.context.Alunos;
 
@@ -50,7 +52,24 @@ namespace SmartSchool.Api.DAO
 
             query = query.AsNoTracking().OrderBy(a => a.Id);
 
-            return query.ToList();            
+            if (!string.IsNullOrEmpty(pageParameters.Nome))
+            {
+                query = query.Where(aluno => aluno.Nome.ToUpper().Contains(pageParameters.Nome.ToUpper()) ||
+                                             aluno.SobreNome.ToUpper().Contains(pageParameters.Nome.ToUpper()));
+
+            }
+
+            if (pageParameters.Matricula > 0)
+            {
+                query = query.Where(aluno => aluno.Matricula == pageParameters.Matricula);
+            }
+
+            if (pageParameters.IsActive != null)
+            {
+                query = query.Where(aluno => aluno.IsActive == (pageParameters.IsActive != 0));
+            }
+
+            return await PageList<Aluno>.CreateAsync(query, pageParameters.PageNumber, pageParameters.PageSize);
         }
 
         public List<Aluno> GetAllAlunosByDisciplina(int disciplinaId, bool includeProfessor = false)
@@ -92,7 +111,7 @@ namespace SmartSchool.Api.DAO
 
             if (includeDisciplinas && includeAlunos == false)
             {
-                query = query.Include(p => p.Disciplinas);                             
+                query = query.Include(p => p.Disciplinas);
             }
 
             if (includeAlunos)
@@ -103,7 +122,7 @@ namespace SmartSchool.Api.DAO
             }
 
             query = query.AsNoTracking().OrderBy(a => a.Id);
-                                        
+
 
             return query.ToList();
         }

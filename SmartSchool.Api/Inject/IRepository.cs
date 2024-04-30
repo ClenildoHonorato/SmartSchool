@@ -1,11 +1,13 @@
-﻿using SmartSchool.Api.Models;
+﻿using SmartSchool.Api.Helpers;
+using SmartSchool.Api.Models;
 using System.Collections.Generic;
+using System.Threading.Tasks;
 
 namespace SmartSchool.Api.Inject
 {
     public interface IRepository
     {
-        List<Aluno> GetAllAlunos(bool includeProfessor = false);
+        Task<PageList<Aluno>> GetAllAlunosAsync(PageParameters pageParameters, bool includeProfessor = false);
 
         List<Aluno> GetAllAlunosByDisciplina(int disciplinaId, bool includeProfessor = false);
 

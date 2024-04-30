@@ -18,7 +18,7 @@
     },
     "SmartSchool.Api": {
       "commandName": "Project",
-      "launchBrowser": true,
+      //"launchBrowser": true,
       //"launchUrl": "api/Aluno",
       "requireExactSource": false,
       "applicationUrl": "http://localhost:5000",
