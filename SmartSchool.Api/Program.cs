@@ -8,8 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 
 namespace SmartSchool.Api
-{
-    public class Program
+{       public class Program
     {
         public static void Main(string[] args)
         {

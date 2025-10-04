@@ -96,6 +96,7 @@ namespace SmartSchool.Api.Data
                     new AlunoDisciplina() {AlunoId = 7, DisciplinaId = 3 },
                     new AlunoDisciplina() {AlunoId = 7, DisciplinaId = 4 },
                     new AlunoDisciplina() {AlunoId = 7, DisciplinaId = 5 }
+
                 });
         }
     }

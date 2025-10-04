@@ -28,7 +28,7 @@ namespace SmartSchool.Api
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<SmartSchoolContext>(
-                context => context.UseSqlite(Configuration.GetConnectionString("default"))
+                context => context.UseMySql(Configuration.GetConnectionString("default"))
                 );
 
             services.AddScoped<IRepository, Repository>();
