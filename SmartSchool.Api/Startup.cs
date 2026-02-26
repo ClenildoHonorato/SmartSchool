@@ -57,6 +57,13 @@ namespace SmartSchool.Api
                 app.UseDeveloperExceptionPage();
             }
 
+            // Applies pending migrations automatically on startup.
+            using (var scope = app.ApplicationServices.CreateScope())
+            {
+                var context = scope.ServiceProvider.GetRequiredService<SmartSchoolContext>();
+                context.Database.Migrate();
+            }
+
             app.UseRouting();
 
             app.UseSwagger();

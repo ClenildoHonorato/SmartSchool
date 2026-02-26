@@ -5,14 +5,11 @@ services:
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ASPNETCORE_URLS=http://+:80
+      - ConnectionStrings__default=Server=mysql;Port=3306;Database=smartschool;User=root;Password=root
     ports:
-      - "5000:80"
-    volumes:
-      - ./SmartSchool.Api/data:/app/data
-    # Configurações para desenvolvimento no Visual Studio
+      - "5001:80"
+    # Configuracoes para desenvolvimento no Visual Studio
     build:
       target: base
     stdin_open: true
     tty: true
-
-

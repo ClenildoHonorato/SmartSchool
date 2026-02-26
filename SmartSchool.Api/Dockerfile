@@ -38,3 +38,4 @@ ENV ASPNETCORE_URLS=http://+:80
 ENTRYPOINT ["dotnet", "SmartSchool.Api.dll"]
 
 
+
